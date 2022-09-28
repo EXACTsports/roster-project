@@ -1,5 +1,7 @@
 # Roster Data Scraping Project
 
+> :warning: **Please fork this repository**: Create a fork of this repository and then submit a pull request when you are ready for us to review it.
+
 We are exploring the idea of scraping college team rosters for information on their current athletes. For this project, 
 you will receive a spreadsheet of collete team rosters. You'll import those rosters into the `rosters` table. You'll 
 then write a command that will scrape those rosters and extract as much information about the athletes on the rosters as
