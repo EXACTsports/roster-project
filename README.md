@@ -2,8 +2,10 @@
 
 > :warning: **Please fork this repository**: Create a fork of this repository and then submit a pull request when you are ready for us to review it.
 
+Please read this [googledoc](https://docs.google.com/document/d/1YmfAFYu4Cyl99ninB4KAeML4y-nmRW0gzI6Xeydg_2g/edit) to view the project overview.
+
 We are exploring the idea of scraping college team rosters for information on their current athletes. For this project, 
-you will receive a spreadsheet of collete team rosters. You'll import those rosters into the `rosters` table. You'll 
+you will receive a spreadsheet of college team rosters. You'll import those rosters into the `rosters` table. You'll 
 then write a command that will scrape those rosters and extract as much information about the athletes on the rosters as
 possible. The only required column for each athlete is name. Everything else is nullable. Write your scraper so that it 
 will extract as much information as possible about each athlete. If you can extract information about atheltes that
