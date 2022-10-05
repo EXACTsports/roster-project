@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Roster extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['university', 'url', 'sport'];
 }
