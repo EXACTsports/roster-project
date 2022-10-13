@@ -50,24 +50,53 @@ class Rosters extends Component
 
         $this->loading = true;
         $this->selectedID = $id;
-        $athletes = Roach::collectSpider(
+
+        $result = Roach::collectSpider(
             EXACTRosterSpider::class, 
             new Overrides(startUrls: [$url]),
-        )[0]->all();
+        );
+
+        if(empty($result)) {
+            dd('empty');
+        }
+
+        $result = $result[0]->all();
+
+        // check status
+        if($result['status'] == 'Not found')
+        {
+            dd($result);
+            return;
+        }
 
         // fix image url
-        foreach ($athletes as $key => $athelte) {
+        foreach ($result['athletes'] as $key => $athelte) {
+            if($athelte['image_url'] == 'undefined') continue;
             $parse = parse_url($athelte['image_url']);
             if(!array_key_exists('host', $parse)) {
                 $parse = parse_url($url);
-                $athletes[$key]['image_url'] = "https://" . $parse['host'] . $athelte['image_url'];
+                $result['athletes'][$key]['image_url'] = "https://" . $parse['host'] . $athelte['image_url'];
             }
         }
 
-        dd($athletes);
+        dd($result);
     }
 
     public function checkRegex()
     {
+        // $pattern = '/(.*?year.?)$|(.*?yr.?)$|(.*?cl.?)$|(.*?class.?)$/i';
+
+        // dd(preg_match($pattern, 'cl.'));
+
+        dd(is_numeric('1'));
+
+        // $str = "Pos.: GK";
+
+        // dd(count(explode(":", $str)));
+    }
+
+    public function scrapAll()
+    {
+        dd('all');
     }
 }
