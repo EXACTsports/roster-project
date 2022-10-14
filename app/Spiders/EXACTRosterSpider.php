@@ -141,6 +141,18 @@ class EXACTRosterSpider extends BasicSpider
                 if($value == -1) {
                     // not found this index
                     $athlete[$key] = 'undefined';
+
+                    // if this index is for image
+                    if($key == 'image_url') {
+                        $images = $response->filter('img');
+                        foreach ($images as $image) {
+                            $image_crawler = new Crawler($image);
+                            if($image_crawler->attr('alt') == $athlete['name']) {
+                                $athlete[$key] = $image_crawler->attr('data-src');
+                                break;
+                            }
+                        }
+                    }
                     continue;
                 }
 
@@ -168,16 +180,19 @@ class EXACTRosterSpider extends BasicSpider
                 }
 
                 if($key == 'year') {
-                    // if year is numeric, we need to change the value
-                    if(is_numeric($text)) {
-                        switch($text) {
-                            case 1: $text = 'Fr'; break;
-                            case 2: $text = 'So'; break;
-                            case 3: $text = 'Jr'; break;
-                            case 4:
-                            case 5:
-                            case 6: $text = 'Sr'; break;
-                        }
+                    switch($text) {
+                        case 'First':
+                        case 1: $text = 'Fr'; break;
+                        case 'Second':
+                        case 2: $text = 'So'; break;
+                        case 'Third':
+                        case 3: $text = 'Jr'; break;
+                        case 'Fourth':
+                        case 'Fifth':
+                        case 'Sixth':
+                        case 4:
+                        case 5:
+                        case 6: $text = 'Sr'; break;
                     }
                 }
 
