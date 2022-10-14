@@ -6,7 +6,11 @@ module.exports = {
     "./resources/**/*.vue",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backdropBlur: {
+        xs: '1px',
+      }
+    },
   },
   plugins: [],
 }
