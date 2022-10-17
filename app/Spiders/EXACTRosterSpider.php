@@ -57,7 +57,40 @@ class EXACTRosterSpider extends BasicSpider
 
         // if the data is in table
         $tables = $response->filter('table')->reduce(function (Crawler $node, $i) {
-            return count($node->children('tbody > tr')) > 10;
+            // check table
+            $flag = false;
+            $heads = [];
+            if(count($node->children('thead > tr')) == 0) {
+                $heads = $node->children('tbody > tr')->first()->children();
+            } else {
+                $heads = $node->children('thead > tr')->first()->children();
+            }
+
+            $cnt = 0;
+            foreach ($heads as $key => $head) {
+                $head_crawler = new Crawler($head);
+                if(preg_match($this->patterns_table['name'], $head_crawler->text()) == 1) {
+                    $cnt++;
+                }
+
+                if(preg_match($this->patterns_table['position'], $head_crawler->text()) == 1) {
+                    $cnt++;
+                }
+
+                if(preg_match($this->patterns_table['year'], $head_crawler->text()) == 1) {
+                    $cnt++;
+                }
+
+                if(preg_match($this->patterns_table['home_town'], $head_crawler->text()) == 1) {
+                    $cnt++;
+                }
+            }
+
+            if($cnt > 3) {
+                $flag = true;
+            }
+
+            return count($node->children('tbody > tr')) > 5 && $flag;
         });
 
         $tb_crawler = null;
@@ -72,7 +105,13 @@ class EXACTRosterSpider extends BasicSpider
             return;
         }
 
-        $heads = $tb_crawler->children('thead > tr')->first()->children('th');
+        // check thead, if there is no header, need to check tbody
+        $heads = [];
+        $isTbody = false;
+        if(count($tb_crawler->children('thead > tr')) == 0) {
+            $heads = $tb_crawler->children('tbody > tr')->first()->children('td');
+            $isTbody = true;
+        } else $heads = $tb_crawler->children('thead > tr')->first()->children('th');
         $head_cnt = count($heads);
         $headers = [];
         $indexes = [
@@ -130,7 +169,11 @@ class EXACTRosterSpider extends BasicSpider
             }
         }
 
-        foreach ($raws as $raw) {
+        foreach ($raws as $key => $raw) {
+            if($isTbody && $key == 0) {
+                continue;
+            }
+
             $tr_crawler = new Crawler($raw);
 
             $tds = $tr_crawler->children();
