@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* data table */
+.row {
+    @apply flex items-center justify-between
+}
+
+.col-sm-12 {
+    @apply w-full
+}
+
+.dataTables_wrapper {
+    @apply flex flex-col gap-3
+}
+
+.dataTables_length, .dataTables_filter, .dataTables_info {
+    @apply text-gray-400
+}
+
+.pagination {
+    @apply flex justify-end gap-2
+}
+
+.paginate_button {
+    @apply text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition
+}
+
+.paginate_button.disabled {
+    @apply cursor-not-allowed hover:bg-gray-800 text-gray-400
+}
+
+.paginate_button.disabled a {
+    @apply cursor-not-allowed
+}
+
+.dataTables_empty {
+    @apply text-center p-2
+}
+
+.dataTables_filter, .dataTables_length label {
+    @apply flex items-center gap-2
+}
+
+.form-control {
+    @apply border text-sm rounded-lg block w-full p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500 focus-visible:outline-none
+}
