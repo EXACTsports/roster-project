@@ -9,5 +9,6 @@ class Roster extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['university', 'url', 'sport'];
+    // status: 0 - pending 1 - success 2 - failure
+    protected $fillable = ['university', 'url', 'sport', 'status'];
 }

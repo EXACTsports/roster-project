@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Athlete extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['roster_id'];
 }
