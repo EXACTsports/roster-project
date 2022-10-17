@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use Livewire\Component;
 use App\Models\Roster;
+use App\Models\Athlete;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RostersImport;
@@ -14,7 +15,7 @@ use RoachPHP\Spider\Configuration\Overrides;
 class Rosters extends Component
 {
     use WithFileUploads;
-    public $rosters = [], $file, $loadData = false, $selectedID = -1;
+    public $rosters = [], $file, $loadData = false, $selectedAthletes = [], $selectedRoster = null, $first_id = -1, $end_id = -1;
 
     public function init()
     {
@@ -42,9 +43,27 @@ class Rosters extends Component
     {
         $roster = Roster::find($id);
 
-        $url = $roster->url;
+        // get the next id
+        $next = Roster::where('id', '>', $id)->orderBy('id')->first();
+        $next_id = -1;
+        if($next) {
+            $next_id = $next->id;
+        }
 
-        $this->selectedID = $id;
+        // check status(if status is not zero, done)
+        if($roster->status != 0) {
+            if($next_id != -1) {
+                $this->dispatchBrowserEvent('scrap', ['id' => $next_id]);
+            }
+            return;
+        }
+
+        if($next_id == $this->end_id) {
+            dd('Finish scrapping 10 rosters!');
+            return;
+        }
+
+        $url = $roster->url;
 
         $result = Roach::collectSpider(
             EXACTRosterSpider::class, 
@@ -53,6 +72,14 @@ class Rosters extends Component
 
         if(empty($result)) {
             $this->emit('failure', ['status' => 'Not found']);
+
+            $roster = Roster::find($id);
+            $roster->status = 2;
+            $roster->save();
+
+            if($next_id != -1) {
+                $this->dispatchBrowserEvent('scrap', ['id' => $next_id]);
+            }
             return;
         }
 
@@ -62,25 +89,64 @@ class Rosters extends Component
         if($result['status'] == 'Not found')
         {
             $this->emit('failure', ['status' => 'Not found']);
+            $roster = Roster::find($id);
+            $roster->status = 2;
+            $roster->save();
+
+            if($next_id != -1) {
+                $this->dispatchBrowserEvent('scrap', ['id' => $next_id]);
+            }
             return;
         }
 
         // fix image url
-        foreach ($result['athletes'] as $key => $athelte) {
-            if($athelte['image_url'] == 'undefined') continue;
-            $parse = parse_url($athelte['image_url']);
+        foreach ($result['athletes'] as $key => $athlete) {
+            if($athlete['image_url'] == 'undefined') continue;
+            $parse = parse_url($athlete['image_url']);
             if(!array_key_exists('host', $parse)) {
                 $parse = parse_url($url);
-                $result['athletes'][$key]['image_url'] = "https://" . $parse['host'] . $athelte['image_url'];
+                $result['athletes'][$key]['image_url'] = "https://" . $parse['host'] . $athlete['image_url'];
             }
         }
 
-        dd($result);
-        $this->emit('success', $result);
+        $this->emit('success', ['status' => $result['status']]);
+
+        // save athlete info
+        foreach ($result['athletes'] as $key => $athlete) {
+            $new = new Athlete;
+
+            $new->roster_id = $id;
+            $new->name = $athlete['name'];
+            $new->image_url = $athlete['image_url'];
+            $new->position = $athlete['position'];
+            $new->year = $athlete['year'];
+            $new->home_town = $athlete['home_town'];
+            $new->extra = json_encode([]);
+
+            $new->save();
+        }
+
+        // update status of this roster
+        $roster = Roster::find($id);
+        $roster->status = 1;
+        $roster->save();
+
+        if($next_id != -1) {
+            $this->dispatchBrowserEvent('scrap', ['id' => $next_id]);
+        }
     }
 
     public function scrapAll()
     {
-        $this->dispatchBrowserEvent('scrap', ['id' => '20083']);
+        $this->first_id = Roster::orderBy('id')->where('status', '==', 0)->get()->first()->id;
+        $this->end_id = $this->first_id + 11;
+        $this->dispatchBrowserEvent('scrap', ['id' => $this->first_id]);
+    }
+
+    public function view($id)
+    {
+        $this->selectedAthletes = Athlete::where('roster_id', $id)->get();
+        $this->selectedRoster = Roster::find($id);
+        $this->dispatchBrowserEvent('athelete');
     }
 }
