@@ -15,7 +15,14 @@ use RoachPHP\Spider\Configuration\Overrides;
 class Rosters extends Component
 {
     use WithFileUploads;
-    public $rosters = [], $file, $loadData = false, $selectedAthletes = [], $selectedRoster = null, $first_id = -1, $end_id = -1;
+
+    public $rosters = [];
+    public $file;
+    public $loadData = false;
+    public $selectedAthletes = [];
+    public $selectedRoster = null;
+    public $first_id = -1;
+    public $end_id = -1;
 
     public function init()
     {
@@ -121,6 +128,8 @@ class Rosters extends Component
             $new->position = $athlete['position'];
             $new->year = $athlete['year'];
             $new->home_town = $athlete['home_town'];
+            $new->height = $athlete['height'];
+            $new->high_school = $athlete['high_school'];
             $new->extra = json_encode([]);
 
             $new->save();
@@ -148,5 +157,11 @@ class Rosters extends Component
         $this->selectedAthletes = Athlete::where('roster_id', $id)->get();
         $this->selectedRoster = Roster::find($id);
         $this->dispatchBrowserEvent('athelete');
+    }
+
+    public function test()
+    {
+        $pattern = '/(^high school.?)$|(^hs.?)$/i';
+        dd(preg_match($pattern, 'HSsdf'));
     }
 }

@@ -18,7 +18,9 @@ class EXACTRosterSpider extends BasicSpider
         "image_url" => '/(^image)|(^img)/i',
         "position" => '/(^pos)|(^position)/i',
         "year" => '/(.*?year.?)$|(.*?yr.?)$|(.*?cl.?)$|(.*?class.?)$/i',
-        "home_town" => '/(^hometown)/i'
+        "home_town" => '/(^hometown)/i',
+        "height" => '/(^ht.?)$|(^height.?)$/i',
+        "high_school" => '/(^high school.?)$|(^hs.?)$/i'
     ];
 
     public array $startUrls = [
@@ -119,7 +121,9 @@ class EXACTRosterSpider extends BasicSpider
             "image_url" => -1,
             "position" => -1,
             "year" => -1,
-            "home_town" => -1
+            "home_town" => -1,
+            "height" => -1,
+            "high_school" => -1
         ];
 
         foreach ($heads as $key => $head) {
@@ -179,6 +183,9 @@ class EXACTRosterSpider extends BasicSpider
             $tds = $tr_crawler->children();
             
             $athlete = [];
+
+            $hs = '';
+
             foreach ($indexes as $key => $value) {
                 // not found
                 if($value == -1) {
@@ -219,6 +226,10 @@ class EXACTRosterSpider extends BasicSpider
                 if($key == 'home_town') {
                     // if home_town field inclues '/' - e.g. Beaumont, Texas / West Brook HS
                     $athlete[$key] = trim(trim(explode('/', $text)[0]), '.');
+
+                    if(count(explode('/', $text)) > 1) {
+                        $hs = trim(trim(explode('/', $text)[1]), '.');
+                    }
                     continue;
                 }
 
@@ -241,6 +252,11 @@ class EXACTRosterSpider extends BasicSpider
 
                 $athlete[$key] = $text;
             }
+
+            if($hs) {
+                $athlete['high_school'] = $hs;
+            }
+
             $athletes[] = $athlete;
         }
 

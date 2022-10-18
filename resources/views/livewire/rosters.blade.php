@@ -113,6 +113,12 @@
                     <th class="px-6 py-3">
                         HomeTown
                     </th>
+                    <th class="px-6 py-3 bg-gray-800">
+                        Height
+                    </th>
+                    <th class="px-6 py-3">
+                        High School
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -123,7 +129,7 @@
                         </th>
     
                         <td class="px-6 py-4">
-                            <img src="{{ $athlete->image_url }}" width="50" height="50" />
+                            <img src="{{ $athlete->image_url == 'undefined' ? '/img/male.jpeg' : $athlete->image_url }}" width="50" height="50" />
                         </td>
     
                         <td class="px-6 py-4">
@@ -140,6 +146,14 @@
     
                         <td class="px-6 py-4">
                             {{ $athlete->home_town }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->height }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->high_school }}
                         </td>
                     </tr>
                 @empty
