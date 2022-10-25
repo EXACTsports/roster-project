@@ -37,7 +37,7 @@
                 x-on:click.stop
                 {!! $clickAwayCloses == true ? '@click.outside="closeModal()"' : '' !!}
                 x-trap.noscroll.inert="open"
-                class="relative w-full max-w-[1000px] py-4 overflow-y-auto bg-gray-800 border rounded-lg shadow-lg dark:text-gray-100 dark:bg-gray-900"
+                class="relative w-full max-w-[1400px] py-4 overflow-y-auto bg-gray-800 border rounded-lg shadow-lg dark:text-gray-100 dark:bg-gray-900"
             >
                 <div class="flex items-center justify-between" >
                     <!-- Close X -->

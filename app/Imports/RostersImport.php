@@ -15,12 +15,13 @@ class RostersImport implements ToModel
     public function model(array $row)
     {
         // remove the first column
-        if($row[6] == 'URL_to_Scrape') return;
+        if($row[6] == 'URL_to_Scrape' || $row[2] == null) return;
 
         return new Roster([
             'university' => $row[2],
             'url' => $row[6],
-            'sport' => $row[5]
+            'sport' => $row[5],
+            'status' => 0
         ]);
     }
 }

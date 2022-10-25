@@ -7,6 +7,10 @@
                     <input type="file" id="file" class="hidden" wire:model="file" />
                 </label>
             </form>
+
+            <div wire:click="test" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
+                Test
+            </div>
     
             <div wire:click="scrapAll" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
                 Scrap All ( {{ count($rosters) }} )
@@ -105,10 +109,10 @@
                         Name
                     </th>
                     <th class="px-6 py-3">
-                        Position
+                        P
                     </th>
                     <th class="px-6 py-3 bg-gray-800">
-                        Year
+                        Y
                     </th>
                     <th class="px-6 py-3">
                         HomeTown
@@ -118,6 +122,15 @@
                     </th>
                     <th class="px-6 py-3">
                         High School
+                    </th>
+                    <th class="px-6 py-3 bg-gray-800">
+                        T
+                    </th>
+                    <th class="px-6 py-3">
+                        I
+                    </th>
+                    <th class="px-6 py-3 bg-gray-800">
+                        O
                     </th>
                 </tr>
             </thead>
@@ -155,6 +168,24 @@
                         <td class="px-6 py-4">
                             {{ $athlete->high_school }}
                         </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->twitter }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->instagram }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->opendorse }}
+                        </td>
+
+                        {{-- <td class="px-6 py-4">
+                            <div wire:click="googleScrap('{{ $selectedRoster->university }}', '{{ $selectedRoster->sport }}', {{ $athlete->id }})" class="text-white flex items-center justify-center focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer hover:bg-gray-600 focus:ring-gray-700 text-sm px-5 py-2.5 bg-gray-700 border-gray-600 transition">
+                                scrap contact
+                            </div>
+                        </td> --}}
                     </tr>
                 @empty
                     <tr>
