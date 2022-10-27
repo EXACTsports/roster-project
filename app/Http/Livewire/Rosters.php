@@ -5,9 +5,11 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use App\Models\Roster;
 use App\Models\Athlete;
+use App\Models\Mapping;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RostersImport;
+use App\Imports\MappingsImport;
 use App\Spiders\EXACTRosterSpider;
 use App\Spiders\OpendorseLinkSpider;
 use App\Spiders\OpendorseDetailSpider;
@@ -26,6 +28,8 @@ class Rosters extends Component
     public $selectedRoster = null;
     public $first_id = -1;
     public $end_id = -1;
+    public $mappings_cnt = 0;
+    public $mappings_file;
 
     public function init()
     {
@@ -47,6 +51,12 @@ class Rosters extends Component
         $this->rosters = Roster::all();
         if(count($this->rosters))
             $this->dispatchBrowserEvent('draw-datatable');
+    }
+
+    public function updatedMappingsFile()
+    {
+        Excel::import(new MappingsImport, $this->mappings_file->store('mapping_temp'));
+        $this->mappings_cnt = Mapping::all()->count();
     }
 
     public function scrap($id)
@@ -170,6 +180,12 @@ class Rosters extends Component
         $this->selectedAthletes = Athlete::where('roster_id', $id)->get();
         $this->selectedRoster = Roster::find($id);
         $this->dispatchBrowserEvent('athelete');
+    }
+
+    public function viewMappingsModal()
+    {
+        $this->mappings_cnt = Mapping::all()->count();
+        $this->dispatchBrowserEvent('mappings');
     }
 
     public function scrapOpendorse($athlete_id)

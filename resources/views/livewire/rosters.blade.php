@@ -8,12 +8,14 @@
                 </label>
             </form>
 
-            <div wire:click="test" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
-                Test
-            </div>
-    
-            <div wire:click="scrapAll" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
-                Scrap All ( {{ count($rosters) }} )
+            <div class="flex gap-2">
+                <div wire:click="viewMappingsModal()" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
+                    Mappings
+                </div>
+        
+                <div wire:click="scrapAll" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
+                    Scrap All ( {{ count($rosters) }} )
+                </div>
             </div>
         </div>
     
@@ -206,6 +208,26 @@
                 @endforelse
             </tbody>
         </table>
+    </x-modal>
+
+    {{-- Mappings table --}}
+    <x-modal name="mappings">
+        {{-- header --}}
+        <div class="flex justify-between px-5 text-2xl font-bold text-white">
+            <span>Mappings</span>
+
+            <form>
+                <label class="block cursor-pointer">
+                    <label for="mappings_file" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-900 hover:bg-gray-700 focus:ring-gray-900 border-gray-700 transition">Import(Mappings)</label>
+                    <input type="file" id="mappings_file" class="hidden" wire:model="mappings_file" />
+                </label>
+            </form>
+        </div>
+
+        {{-- detail info --}}
+        <div class="flex px-5 text-white">
+            Total amoung of mappings is {{ $mappings_cnt }}
+        </div>
     </x-modal>
 
     <script>
