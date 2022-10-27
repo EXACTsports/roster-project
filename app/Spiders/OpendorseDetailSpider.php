@@ -81,8 +81,8 @@ class OpendorseDetailSpider extends BasicSpider
             }
         }
 
-        dd($social);
-        
+        $result["social"] = $social;
+
         yield $this->item($result);
     }
 }

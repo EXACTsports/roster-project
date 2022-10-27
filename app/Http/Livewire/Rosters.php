@@ -142,7 +142,10 @@ class Rosters extends Component
             $new->save();
 
             // scrap social links
+            // --- scrap twitter
             $this->googleScrap($roster->university, $roster->sport, $new->id);
+            // --- scrap opendorse
+            $this->scrapOpendorse($new->id);
         }
 
         // update status of this roster
@@ -180,7 +183,7 @@ class Rosters extends Component
         );
 
         if(empty($result)) {
-            dd("empty");
+            return;
         }
 
         $result = $result[0]->all();
@@ -197,17 +200,40 @@ class Rosters extends Component
                 break;
             }
         }
-        
-        // dd($isFound, $opendorseURL);
 
         // detect detail
         if($isFound) {
+            $athlete->opendorse = $opendorseURL;
+
+            $athlete->save();
+
             $result = Roach::collectSpider(
                 OpendorseDetailSpider::class, 
                 new Overrides(startUrls: [$opendorseURL]),
             );
+
+            if(empty($result)) {
+                return;
+            }
+
+            $result = $result[0]->all();
+
+            foreach ($result["social"] as $key => $social) {
+                switch($key) {
+                    case "instagram": 
+                        if($social)
+                            $athlete->instagram = $social;
+                        break;
+                    case "twitter": 
+                        if($social)
+                            $athlete->twitter = $social; 
+                        break;
+                }
+            }
+
+            $athlete->save();
         } else {
-            dd("Not found!");
+            return;
         }
     }
 
@@ -273,14 +299,14 @@ class Rosters extends Component
             // check
             if($isMatchName && ($isMatchUniversity || $isMatchSport)) {
                 $isTwitterFound = true;
-                $twitter = $candidate["twitter_id"];
+                $twitter = substr($candidate["twitter_id"], 1);
                 break;
             }
         }
 
         if($isTwitterFound) {
             // dd("Twitter found", $twitter);
-            $athlete->twitter = $twitter;
+            $athlete->twitter = "https://twitter.com/" . $twitter;
 
             $athlete->save();
         } else {
@@ -291,5 +317,6 @@ class Rosters extends Component
 
     public function test()
     {
+        $this->scrapOpendorse(4500);
     }
 }

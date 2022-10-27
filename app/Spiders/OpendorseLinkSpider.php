@@ -61,10 +61,14 @@ class OpendorseLinkSpider extends BasicSpider
             $url = explode("&", str_replace("/url?q=", "", $link_crawler->attr("href")))[0];
             $url = explode("%", $url)[0];
             $urls[] = $url;
-            $t = explode("-", $link_crawler->children("h3")->text())[0];
-            $t = explode(",", $t)[0];
-            $t = explode(":", $t)[0];
-            $names[] = trim($t);
+            if(count($link_crawler->children("h3"))) {
+                $t = explode("-", $link_crawler->children("h3")->text())[0];
+                $t = explode(",", $t)[0];
+                $t = explode(":", $t)[0];
+                $names[] = trim($t);
+            } else {
+                $names[] = "";
+            }
         }
 
         $result = [
