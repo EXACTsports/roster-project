@@ -21,23 +21,39 @@ class Rosters extends Component
 {
     use WithFileUploads;
 
-    public $rosters = [];
-    public $file;
-    public $loadData = false;
-    public $selectedAthletes = [];
-    public $selectedRoster = null;
-    public $first_id = -1;
-    public $end_id = -1;
-    public $mappings_cnt = 0;
-    public $mappings_file;
+    public $rosters = []; // roster list
+    public $file; // external roster excel file
+    public $loadData = false; // check loaded
+    public $selectedAthletes = []; // selected athletes data by each roster
+    public $selectedRoster = null; // selected roster id
+    public $first_id = -1; // start roster id to start scrap
+    public $end_id = -1; // end roster id to end scrap
+    public $mappings_cnt = 0; // mappings amount
+    public $mappings_file; // external mappings excel file
 
+    /**
+        *  init
+        * 
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function init()
     {
+        // set loaded true
         $this->loadData = true;
     }
 
+    /**
+        *  render
+        * 
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return view roster
+    */
     public function render()
     {
+        // check load state and get all rosters
         if($this->loadData == true)
         {
             $this->rosters = Roster::all();
@@ -45,20 +61,45 @@ class Rosters extends Component
         return view('livewire.rosters');
     }
 
+    /**
+        *  updatedFile - once someone select file in the form, will get called automatically
+        * 
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function updatedFile()
     {
+        // imports roster data from external excel file
         Excel::import(new RostersImport, $this->file->store('temp'));
         $this->rosters = Roster::all();
         if(count($this->rosters))
             $this->dispatchBrowserEvent('draw-datatable');
     }
 
+    /**
+        *  updatedFile - once someone select file in the form, will get called automatically
+        * 
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function updatedMappingsFile()
     {
+        // imports mappings data from external excel file
         Excel::import(new MappingsImport, $this->mappings_file->store('mapping_temp'));
         $this->mappings_cnt = Mapping::all()->count();
     }
 
+    /**
+        *  scrap - scrap roster one by one, also scrap social links of each athlete. And save data in DB
+        * 
+        *  @param roster_id $id
+        *
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function scrap($id)
     {
         $roster = Roster::find($id);
@@ -168,13 +209,30 @@ class Rosters extends Component
         }
     }
 
+    /**
+        *  scrapAll - bootstrap scrapping
+        * 
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function scrapAll()
     {
+        // check first roster's id to be done
         $this->first_id = Roster::orderBy('id')->where('status', '==', 0)->get()->first()->id;
-        $this->end_id = $this->first_id + 50;
+        $this->end_id = $this->first_id + 50; // TODO: fix the amount of rosters to be done
         $this->dispatchBrowserEvent('scrap', ['id' => $this->first_id]);
     }
 
+    /**
+        *  view - View modal which contains athlete data of each roster
+        * 
+        *  @param roster_id $id
+        *
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function view($id)
     {
         $this->selectedAthletes = Athlete::where('roster_id', $id)->get();
@@ -182,12 +240,28 @@ class Rosters extends Component
         $this->dispatchBrowserEvent('athelete');
     }
 
+    /**
+        *  view - View modal which contains mappings data
+        *
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function viewMappingsModal()
     {
         $this->mappings_cnt = Mapping::all()->count();
         $this->dispatchBrowserEvent('mappings');
     }
 
+    /**
+        *  scrapOpendorse - scrap opendorse link of each athlete by google search engine
+        * 
+        *  @param athlete_id $id
+        *
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function scrapOpendorse($athlete_id)
     {   
         $athlete = Athlete::find($athlete_id);
@@ -253,6 +327,17 @@ class Rosters extends Component
         }
     }
 
+    /**
+        *  googleScrap - scrap other social links(twitter, instagram) of each athlete by google search engine
+        * 
+        *  @param university
+        *  @param sport
+        *  @param athlete
+        *
+        *  @throws 
+        *  @author hardcommitoneself <hardcommitoneself@gmail.com>
+        *  @return void
+    */
     public function googleScrap($university, $sport, $athlete_id)
     {
         $athlete = Athlete::find($athlete_id);
