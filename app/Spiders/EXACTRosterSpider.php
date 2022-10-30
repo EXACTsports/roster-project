@@ -14,13 +14,15 @@ use Symfony\Component\DomCrawler\Crawler;
 class EXACTRosterSpider extends BasicSpider
 {
     private $patterns_table = [
+        "jersey" => "/^#$/i",
         "name" => '/.*?name$/i',
         "image_url" => '/(^image)|(^img)/i',
         "position" => '/(^pos)|(^position)/i',
         "year" => '/(.*?year.?)$|(.*?yr.?)$|(.*?cl.?)$|(.*?class.?)$/i',
         "home_town" => '/(^hometown)/i',
         "height" => '/(^ht.?)$|(^height.?)$/i',
-        "high_school" => '/(^high school.?)$|(^hs.?)$/i'
+        "high_school" => '/(^high school.?)$|(^hs.?)$/i',
+        "previous_school" => '/(^previous school.?)$|(^ps.?)$/i'
     ];
 
     public array $startUrls = [
@@ -117,13 +119,15 @@ class EXACTRosterSpider extends BasicSpider
         $head_cnt = count($heads);
         $headers = [];
         $indexes = [
+            "jersey" => -1,
             "name" => -1,
             "image_url" => -1,
             "position" => -1,
             "year" => -1,
             "home_town" => -1,
             "height" => -1,
-            "high_school" => -1
+            "high_school" => -1,
+            "previous_school" => -1
         ];
 
         foreach ($heads as $key => $head) {
@@ -173,6 +177,8 @@ class EXACTRosterSpider extends BasicSpider
             }
         }
 
+        // dd($indexes);
+
         foreach ($raws as $key => $raw) {
             if($isTbody && $key == 0) {
                 continue;
@@ -204,6 +210,20 @@ class EXACTRosterSpider extends BasicSpider
                         }
                     }
                     continue;
+                }
+
+                // get jersey
+                if($key == 'jersey') {
+                    $athlete[$key] = $tds->eq($value)->text();
+                }
+
+                // get profile link
+                if($key == 'name') {
+                    if(count($tds->eq($value)->children('a')) != 0) {
+                        $athlete["profile_link"] = $tds->eq($value)->children('a')->first()->attr('href');
+                    } else {
+                        $athlete["profile_link"] = "";
+                    }
                 }
 
                 // get image url

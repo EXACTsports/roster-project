@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Roster;
 use App\Models\Athlete;
 use App\Models\Mapping;
+use App\Models\Analysis;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RostersImport;
@@ -176,28 +177,122 @@ class Rosters extends Component
 
         $this->emit('success', ['status' => $result['status']]);
 
-        // save athlete info
+        // save athlete info and analysis info
+        $analysis = new Analysis;
+
+        $freshman = 0;
+        $sophomores = 0;
+        $juniors = 0;
+        $seniors = 0;
+        $total_height = 0.0;
+        $total_members = 0;
+        $number_by_state = [];
+        $number_by_position = [];
+
         foreach ($result['athletes'] as $key => $athlete) {
+            // seach mappings and fix the values by thme
+            // --- position
+            $label_position = "sport-" . strtolower(trim(explode("(", $roster->sport)[0])) . "-position-" . $athlete['position'];
+            $mapping_position = Mapping::where('label', $label_position)->firstOr(function() {
+                return null;
+            });
+            $mapping_position = $mapping_position == null ? $athlete['position'] : $mapping_position->mapping;
+
+            if(key_exists($mapping_position, $number_by_position)) {
+                $number_by_position[$mapping_position]++;
+            } else {
+                $number_by_position[$mapping_position] = 1;
+            }
+
+            // --- home town
+            $explode_homes = explode(",", $athlete['home_town']);
+            $label_hometown = "state-" . str_replace(" ", "-", trim($explode_homes[count($explode_homes) - 1]));
+            $mapping_hometown = Mapping::where('label', $label_hometown)->firstOr(function() {
+                return null;
+            });
+            $mapping_hometown = $mapping_hometown == null ? $athlete['home_town'] : $mapping_hometown->mapping;
+
+            if(key_exists($mapping_hometown, $number_by_state)) {
+                $number_by_state[$mapping_hometown]++;
+            } else {
+                $number_by_state[$mapping_hometown] = 1;
+            }
+
+            // --- year
+            $label_year = "class-" . $athlete['year'];
+            $mapping_year = Mapping::where('label', $label_year)->firstOr(function() {
+                return null;
+            });
+            $mapping_year = $mapping_year == null ? $athlete['year'] : $mapping_year->mapping;
+
+            // --- height - 6'23" => 6-23, 4-12
+            $mapping_height = str_replace("'", "-", trim($athlete['height'], '"'));
+
+            // --- hometown city
+            $mapping_city = $explode_homes[0];
+
+            // --- profile link
+            $parse = parse_url($url);
+            $mapping_profile_link = "https://" . $parse["host"] . $athlete["profile_link"];
+
             $new = new Athlete;
 
             $new->roster_id = $id;
             $new->name = $athlete['name'];
             $new->image_url = $athlete['image_url'];
-            $new->position = $athlete['position'];
-            $new->year = $athlete['year'];
-            $new->home_town = $athlete['home_town'];
-            $new->height = $athlete['height'];
+            $new->position = $mapping_position;
+            $new->year = $mapping_year;
+            $new->home_town = $mapping_hometown;
+            $new->height = $mapping_height; 
             $new->high_school = $athlete['high_school'];
+            $new->city = $mapping_city;
+            $new->previous_school = $athlete['previous_school'];
+            $new->profile_link = $mapping_profile_link;
+            $new->jersey = $athlete["jersey"];
             $new->extra = json_encode([]);
 
             $new->save();
 
+            // analysis data
+            // --- year
+            switch($mapping_year) {
+                case "Freshman": $freshman++; break;
+                case "Sophomore": $sophomores++; break;
+                case "Senior": $seniors++; break;
+                case "Junior": $juniors++; break;
+            }
+
+            // --- increase total height with inches
+            $explodes_height = explode("-", $mapping_height);
+            $total_height += $explodes_height[0] * 12 + $explodes_height[1];
+
+            // --- increase total members
+            $total_members++;
+
             // scrap social links
             // --- scrap twitter
-            $this->googleScrap($roster->university, $roster->sport, $new->id);
+            // $this->googleScrap($roster->university, $roster->sport, $new->id);
             // --- scrap opendorse
-            $this->scrapOpendorse($new->id);
+            // $this->scrapOpendorse($new->id);
         }
+        $total_feet = intdiv($total_height, 12);
+        $remain_inches = $total_height % 12;
+        $avg_feet = intdiv($total_feet, $total_members);
+        $avg_inches = (($total_feet % $total_members) * 12 + $remain_inches) / $total_members;
+
+        // save analysis data
+        $analysis->roster_id = $id;
+        $analysis->freshman = $freshman;
+        $analysis->sophomores = $sophomores;
+        $analysis->seniors = $seniors;
+        $analysis->juniors = $juniors;
+        $analysis->avg_height = $avg_feet . "-" . $avg_inches;
+        $analysis->number_by_state = json_encode($number_by_state);
+        $analysis->number_by_position = json_encode($number_by_position);
+
+        dd($analysis);
+
+        $analysis->save();
 
         // update status of this roster
         $roster = Roster::find($id);
@@ -220,7 +315,7 @@ class Rosters extends Component
     {
         // check first roster's id to be done
         $this->first_id = Roster::orderBy('id')->where('status', '==', 0)->get()->first()->id;
-        $this->end_id = $this->first_id + 50; // TODO: fix the amount of rosters to be done
+        $this->end_id = $this->first_id + 5; // TODO: fix the amount of rosters to be done
         $this->dispatchBrowserEvent('scrap', ['id' => $this->first_id]);
     }
 
@@ -418,6 +513,6 @@ class Rosters extends Component
 
     public function test()
     {
-        $this->scrapOpendorse(4500);
+        $this->scrap(25609);
     }
 }

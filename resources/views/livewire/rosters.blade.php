@@ -9,7 +9,7 @@
             </form>
 
             <div class="flex gap-2">
-                <div wire:click="viewMappingsModal()" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
+                <div wire:click="test" class="text-white focus:outline-none focus:ring-2 font-medium rounded-lg cursor-pointer text-sm px-5 py-2.5 mr-2 mb-2 bg-gray-800 hover:bg-gray-700 focus:ring-gray-800 border-gray-700 transition">
                     Mappings
                 </div>
         
@@ -102,7 +102,7 @@
             <thead class="text-xs text-gray-400 uppercase">
                 <tr>
                     <th class="px-6 py-3 bg-gray-800">
-                        No
+                        #
                     </th>
                     <th class="px-6 py-3">
                         Image
@@ -117,13 +117,19 @@
                         Y
                     </th>
                     <th class="px-6 py-3">
-                        HomeTown
-                    </th>
-                    <th class="px-6 py-3 bg-gray-800">
-                        Height
+                        State
                     </th>
                     <th class="px-6 py-3">
-                        High School
+                        City
+                    </th>
+                    <th class="px-6 py-3 bg-gray-800">
+                        H
+                    </th>
+                    <th class="px-6 py-3">
+                        HS
+                    </th>
+                    <th class="px-6 py-3">
+                        PS
                     </th>
                     <th class="px-6 py-3 bg-gray-800">
                         T
@@ -140,7 +146,7 @@
                 @forelse ($selectedAthletes as $key => $athlete)
                     <tr>
                         <th class="px-6 py-4 font-medium text-white bg-gray-800 whitespace-nowrap">
-                            {{ $key + 1 }}
+                            {{ $athlete->jersey }}
                         </th>
     
                         <td class="px-6 py-4">
@@ -148,7 +154,9 @@
                         </td>
     
                         <td class="px-6 py-4">
-                            {{ $athlete->name }}
+                            <a class="underline" target="_blank" href="{{ $athlete->profile_link }}">
+                                {{ $athlete->name }}
+                            </a>
                         </td>
     
                         <td class="px-6 py-4">
@@ -164,11 +172,19 @@
                         </td>
 
                         <td class="px-6 py-4">
+                            {{ $athlete->city }}
+                        </td>
+
+                        <td class="px-6 py-4">
                             {{ $athlete->height }}
                         </td>
 
                         <td class="px-6 py-4">
-                            {{ $athlete->high_school }}
+                            {{ $athlete->high_school == "undefined" ? "-" : $athlete->high_school }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {{ $athlete->previous_school == "undefined" ? "-" : $athlete->previous_school }}
                         </td>
 
                         <td class="px-6 py-4">
